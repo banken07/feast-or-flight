@@ -253,28 +253,49 @@ function drawKnifeCart(ctx, it) {
   ctx.fill();
 }
 
-// A low branch with autumn leaves: duck under it.
+// A low branch with autumn leaves: duck under it. Drawn thick, with
+// leaves above and a few hanging below the limb, so it reads as an
+// overhead branch at a glance — not a streak across the turkey.
 function drawBranch(ctx, it) {
   const y = CFG.groundY - 84;
+  // Main limb.
   ctx.strokeStyle = '#4a2e16';
-  ctx.lineWidth = 12;
+  ctx.lineWidth = 16;
   ctx.lineCap = 'round';
   ctx.beginPath();
   ctx.moveTo(it.x - 6, y + 8);
   ctx.lineTo(it.x + it.w + 6, y + 2);
   ctx.stroke();
-  ctx.fillStyle = '#c65a1a';
-  for (let i = 0; i < 6; i++) {
-    const lx = it.x + 10 + i * 19;
+  // Second, thinner limb above it for mass.
+  ctx.strokeStyle = '#5a3a1e';
+  ctx.lineWidth = 8;
+  ctx.beginPath();
+  ctx.moveTo(it.x + 4, y - 6);
+  ctx.lineTo(it.x + it.w - 2, y - 10);
+  ctx.stroke();
+  // Leaves above the limb, orange mixed with green so the branch reads
+  // as foliage and not as the turkey's tail feathers.
+  const leafColors = ['#c65a1a', '#e8a33d', '#7a8a3d', '#d97b29', '#5a6b2f'];
+  for (let i = 0; i < 8; i++) {
+    const lx = it.x + 8 + i * 15;
+    ctx.fillStyle = leafColors[i % leafColors.length];
     ctx.beginPath();
-    ctx.ellipse(lx, y - 4 + (i % 2) * 8, 9, 6, 0.5, 0, Math.PI * 2);
+    ctx.ellipse(lx, y - 8 + (i % 2) * 8, 11, 7, 0.5, 0, Math.PI * 2);
     ctx.fill();
   }
-  ctx.fillStyle = '#e8a33d';
+  // Leaves hanging below the limb: the underside edge a ducking turkey
+  // slips under.
   for (let i = 0; i < 4; i++) {
-    const lx = it.x + 20 + i * 26;
+    const lx = it.x + 18 + i * 28;
+    ctx.strokeStyle = '#4a2e16';
+    ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.ellipse(lx, y + 12, 7, 5, -0.4, 0, Math.PI * 2);
+    ctx.moveTo(lx, y + 10);
+    ctx.lineTo(lx, y + 22);
+    ctx.stroke();
+    ctx.fillStyle = leafColors[(i + 2) % leafColors.length];
+    ctx.beginPath();
+    ctx.ellipse(lx, y + 26, 9, 6, -0.4, 0, Math.PI * 2);
     ctx.fill();
   }
 }

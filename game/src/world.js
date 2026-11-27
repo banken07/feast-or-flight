@@ -199,15 +199,19 @@ function drawForestGate(ctx, x, time) {
   ctx.beginPath();
   ctx.arc(x, CFG.groundY - 90, 130, 0, Math.PI * 2);
   ctx.fill();
-  // Banner.
-  ctx.fillStyle = '#2e5a2e';
+  // Banner: a bright cream panel with dark green text and a dark outline,
+  // so the label reads at thumbnail size even under the end-screen dim.
+  ctx.fillStyle = '#fff3d6';
   ctx.beginPath();
-  ctx.roundRect(x - 90, CFG.groundY - 250, 180, 40, 8);
+  ctx.roundRect(x - 100, CFG.groundY - 256, 200, 46, 8);
   ctx.fill();
-  ctx.fillStyle = '#ffd166';
-  ctx.font = 'bold 22px system-ui, sans-serif';
+  ctx.strokeStyle = '#1e3a1e';
+  ctx.lineWidth = 4;
+  ctx.stroke();
+  ctx.fillStyle = '#1e3a1e';
+  ctx.font = 'bold 25px system-ui, sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('FOREST GATE', x, CFG.groundY - 223);
+  ctx.fillText('FOREST GATE', x, CFG.groundY - 224);
   // Fireflies.
   ctx.fillStyle = '#fff3a0';
   for (let i = 0; i < 8; i++) {

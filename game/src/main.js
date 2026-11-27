@@ -143,7 +143,10 @@ function gameDraw() {
   }
   worldDraw(ctx, Game.world, Game.distance, Game.time);
   obstacleDraw(ctx, Game.field, Game.time);
-  farmerDraw(ctx, Game.turkey.x, Game.gap, Game.time);
+  // On the title screen the farmer stands a little closer in, so his
+  // whole figure is inside the frame instead of being cut at the edge.
+  const farmerGap = Game.state === 'title' ? 84 : Game.gap;
+  farmerDraw(ctx, Game.turkey.x, farmerGap, Game.time);
   turkeyDraw(ctx, Game.turkey, Game.time);
   ctx.restore();
 
