@@ -17,10 +17,11 @@ const CFG = {
   // Dash, is ~290px tall at 1280-wide) while the hitbox, jump physics
   // and floor all keep using turkeyWidth/turkeyHeight, so the run plays
   // exactly as before. v4 at 1.3 was ~140px (too small), v5 at 1.9 was
-  // ~205px (too big, per Ban) — 1.6 lands ~172px, between the two. The
-  // duck pose is NOT scaled: its head must stay clear of the hanging
-  // branch leaves.
-  turkeyDrawScale: 1.6,
+  // ~205px (too big, per Ban), v6-v10 at 1.6 was ~172px — Ban 27 Nov
+  // ~20:16 WIB: STILL too big. v11 at 1.45 lands ~158px, the midpoint
+  // between 1.3 (too small) and 1.6 (too big). The duck pose is NOT
+  // scaled: its head must stay clear of the hanging branch leaves.
+  turkeyDrawScale: 1.45,
   jumpVelocity: 1000,
   gravity: 2900,
 
