@@ -20,6 +20,10 @@ const Game = {
   ctx: null,
   lastT: 0,
   shakeT: 0,
+  // Pickup floaters: a mini icon + "+points" that flies from the pickup
+  // point to the SCORE text when a pickup is collected. Purely visual,
+  // driven by game time only (deterministic).
+  floaters: [],
 };
 
 function gameSeedFromUrl() {
@@ -48,6 +52,7 @@ function gameReset() {
   Game.gap = CFG.gapStart;
   Game.speed = CFG.baseSpeed;
   Game.shakeT = 0;
+  Game.floaters = [];
   Game.turkey = createTurkey();
   Game.farmer = createFarmer();
   Game.field = createObstacleField();
@@ -70,8 +75,54 @@ function gameLoop(t) {
   Game.lastT = t;
   Game.time += dt;
   if (Game.state === 'playing') gameUpdate(dt);
+  gameUpdateFloaters(dt);
   gameDraw();
   requestAnimationFrame(gameLoop);
+}
+
+// Pickup floaters fly from the pickup point to the SCORE text (top-left,
+// drawn at x=22, y=40) over 0.6s, shrinking and fading out. Updated every
+// frame regardless of state so a floater always finishes its flight.
+function gameUpdateFloaters(dt) {
+  for (const f of Game.floaters) f.t += dt;
+  Game.floaters = Game.floaters.filter((f) => f.t < 0.6);
+}
+
+function gameSpawnFloater(item, kind, value) {
+  Game.floaters.push({
+    sx: item.x + item.w / 2,
+    sy: item.y + item.h / 2,
+    kind,
+    value,
+    t: 0,
+  });
+}
+
+function floaterDraw(ctx) {
+  for (const f of Game.floaters) {
+    const k = Math.min(1, f.t / 0.6);
+    const e = 1 - Math.pow(1 - k, 3); // ease-out cubic
+    const x = f.sx + (100 - f.sx) * e;
+    const y = f.sy + (34 - f.sy) * e;
+    const alpha = k < 0.6 ? 1 : 1 - (k - 0.6) / 0.4;
+    const s = 1 - 0.4 * k;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(x, y);
+    ctx.scale(s, s);
+    // Reuse the pickup's own art, drawn small around the floater point.
+    if (f.kind === 'corn') drawCorn(ctx, { x: -13, y: -13, w: 26, h: 26 }, 0);
+    else if (f.kind === 'feather') drawFeather(ctx, { x: -15, y: -15, w: 30, h: 30 }, 0);
+    else drawPie(ctx, { x: -20, y: -17, w: 40, h: 34 });
+    ctx.restore();
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = '#ffd166';
+    ctx.font = 'bold 20px system-ui, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('+' + f.value, x + 18, y + 7);
+    ctx.restore();
+  }
 }
 
 function gameUpdate(dt) {
@@ -108,13 +159,16 @@ function gameApplyEvent(ev) {
   if (ev.type === 'corn') {
     Game.bonusScore += CFG.cornScore;
     Game.gap = Math.min(CFG.gapMax, Game.gap + CFG.gapCornBonus);
+    gameSpawnFloater(ev.item, 'corn', CFG.cornScore);
     AudioSys.pickup();
   } else if (ev.type === 'feather') {
     Game.bonusScore += CFG.featherScore;
+    gameSpawnFloater(ev.item, 'feather', CFG.featherScore);
     AudioSys.feather();
   } else if (ev.type === 'pie') {
     Game.bonusScore += CFG.pieScore;
     Game.lives = Math.min(CFG.livesStart, Game.lives + 1);
+    gameSpawnFloater(ev.item, 'pie', CFG.pieScore);
     AudioSys.feather();
   } else if (ev.type === 'hit') {
     if (Game.turkey.invulnT > 0) return;
@@ -175,6 +229,8 @@ function gameDraw() {
     hudDraw(ctx, Game);
     hudDrawEnd(ctx, Game);
   }
+  // Pickup floaters draw last, on top of everything, in screen space.
+  floaterDraw(ctx);
 }
 
 function gameOnKeyDown(e) {

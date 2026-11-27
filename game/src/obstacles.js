@@ -121,6 +121,11 @@ function obstacleCollisions(field, turkeyBox) {
 
 function obstacleDraw(ctx, field, time) {
   for (const it of field.items) {
+    // A collected pickup vanishes the instant the turkey touches it —
+    // before this fix it kept scrolling along "stuck" in place, because
+    // draw ran over every item and only the off-screen filter removed it.
+    // (Hit obstacles keep drawing after a hit: only pickups vanish.)
+    if (it.passed && (it.kind === 'corn' || it.kind === 'feather' || it.kind === 'pie')) continue;
     if (it.kind === 'fence') drawFence(ctx, it);
     else if (it.kind === 'hay') drawHay(ctx, it);
     else if (it.kind === 'oven') drawOven(ctx, it, time);
