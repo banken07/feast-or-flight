@@ -155,17 +155,24 @@ function worldDraw(ctx, world, distance, time) {
 
   // Farmhouse and barn silhouettes (parallax 0.35). Bases sit below the
   // deepest hill crest (534) so they are always sunk into the hillside.
+  // Each building is drawn twice — at farmX and one full cycle (1500px)
+  // to the right — so the set wraps seamlessly: at r = 1500 the copies
+  // sit exactly where the originals sit at r = 0, and there is never a
+  // phase of the cycle with no building on screen (v13 left r in
+  // (1090, 1500) — ~27% of each cycle — with nothing visible at all).
   const farmX = 180 - ((world.scroll * 0.35) % 1500);
-  drawFarmhouse(ctx, farmX, 545);
-  drawFarmhouse(ctx, farmX + 760, 545);
-  drawBarn(ctx, farmX + 420, 555);
+  for (const fx of [farmX, farmX + 1500]) {
+    drawFarmhouse(ctx, fx, 545);
+    drawFarmhouse(ctx, fx + 760, 545);
+    drawBarn(ctx, fx + 420, 555);
+  }
 
   // Kitchen-yard smoke: in stage 2 the ovens are cooking, so the
   // farmhouse chimneys breathe harder — extra puffs rising above the
   // houses, fading in and out with the stage blend.
   if (kitchenness > 0.03) {
     ctx.fillStyle = `rgba(230, 220, 240, ${0.28 * kitchenness})`;
-    for (const cx of [farmX + 118, farmX + 878]) {
+    for (const cx of [farmX + 118, farmX + 878, farmX + 1618, farmX + 2378]) {
       for (let i = 0; i < 3; i++) {
         const rise = (time * 12 + i * 45) % 135;
         const px = cx + Math.sin(time + i * 2) * 6;
