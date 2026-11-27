@@ -1,6 +1,14 @@
 // Feast or Flight — the sunset farm world.
 // Parallax layers: sky, sun, clouds, hills, farmhouse, barn, trees, then
 // the dirt path the turkey runs on, with drifting autumn leaves.
+//
+// GROUNDING (v10): the far-hill crest is 500 - sin(...)*34, so it ranges
+// y 466-534 as the run scrolls. The farmhouse used to sit at baseY 470
+// and the barn at 500 — both ABOVE the crest at most scroll phases,
+// leaving up to ~48px of bright sky under the building, so the house
+// read as floating (Ban caught it). Both bases now sit BELOW the
+// deepest possible crest (534) with a contact shadow, so the buildings
+// are sunk into the hillside at every scroll phase and can never float.
 
 // Stage palettes: the run's three places share the sunset family but
 // read differently — farmyard (baseline), kitchen yard (warmer, deeper
@@ -145,11 +153,12 @@ function worldDraw(ctx, world, distance, time) {
   ctx.closePath();
   ctx.fill();
 
-  // Farmhouse and barn silhouettes (parallax 0.35).
+  // Farmhouse and barn silhouettes (parallax 0.35). Bases sit below the
+  // deepest hill crest (534) so they are always sunk into the hillside.
   const farmX = 180 - ((world.scroll * 0.35) % 1500);
-  drawFarmhouse(ctx, farmX, 470);
-  drawFarmhouse(ctx, farmX + 760, 470);
-  drawBarn(ctx, farmX + 420, 500);
+  drawFarmhouse(ctx, farmX, 545);
+  drawFarmhouse(ctx, farmX + 760, 545);
+  drawBarn(ctx, farmX + 420, 555);
 
   // Kitchen-yard smoke: in stage 2 the ovens are cooking, so the
   // farmhouse chimneys breathe harder — extra puffs rising above the
@@ -160,7 +169,7 @@ function worldDraw(ctx, world, distance, time) {
       for (let i = 0; i < 3; i++) {
         const rise = (time * 12 + i * 45) % 135;
         const px = cx + Math.sin(time + i * 2) * 6;
-        const py = 470 - 150 - rise;
+        const py = 545 - 150 - rise;
         ctx.beginPath();
         ctx.arc(px, py, 8 + i * 2, 0, Math.PI * 2);
         ctx.fill();
@@ -238,6 +247,13 @@ function worldDraw(ctx, world, distance, time) {
 }
 
 function drawFarmhouse(ctx, x, baseY) {
+  // Contact shadow: a dark smudge on the hillside under the base, so the
+  // building reads as sitting on the hill even where hill and house
+  // colours are close (stage 3).
+  ctx.fillStyle = 'rgba(20, 8, 20, 0.3)';
+  ctx.beginPath();
+  ctx.ellipse(x + 75, baseY + 2, 88, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
   ctx.fillStyle = '#2e1a3a';
   ctx.fillRect(x, baseY - 90, 150, 90);
   ctx.beginPath();
@@ -260,6 +276,11 @@ function drawFarmhouse(ctx, x, baseY) {
 }
 
 function drawBarn(ctx, x, baseY) {
+  // Contact shadow under the base, same reason as the farmhouse.
+  ctx.fillStyle = 'rgba(20, 8, 20, 0.3)';
+  ctx.beginPath();
+  ctx.ellipse(x + 60, baseY + 2, 72, 7, 0, 0, Math.PI * 2);
+  ctx.fill();
   ctx.fillStyle = '#4a1f1a';
   ctx.fillRect(x, baseY - 70, 120, 70);
   ctx.beginPath();
