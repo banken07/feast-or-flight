@@ -12,13 +12,13 @@ const CFG = {
   turkeyWidth: 92,
   turkeyHeight: 84,
   turkeyDuckHeight: 46,
-  jumpVelocity: 980,
-  gravity: 2700,
+  jumpVelocity: 1000,
+  gravity: 2900,
 
   // Run.
   baseSpeed: 380,
-  maxSpeed: 760,
-  speedPerMeter: 0.38,
+  maxSpeed: 640,
+  speedPerMeter: 0.26,
   metersPerPixel: 0.06,
 
   // Farmer chase. The gap is the distance in pixels between the farmer
@@ -26,8 +26,8 @@ const CFG = {
   // is clean. Gap zero means the farmer has the turkey.
   gapStart: 150,
   gapMax: 200,
-  gapRecoverPerSecond: 9,
-  gapHitPenalty: 46,
+  gapRecoverPerSecond: 11,
+  gapHitPenalty: 40,
   gapCornBonus: 3,
   gapDanger: 55,
 
@@ -39,8 +39,10 @@ const CFG = {
   distanceScorePerMeter: 10,
 
   // Spawning (seconds between obstacle groups, scaled by speed).
-  spawnMinGapPx: 400,
-  spawnMaxGapPx: 660,
+  // The minimum gap leaves room to land one jump before the next
+  // obstacle arrives, so a narrow escape stays fair at top speed.
+  spawnMinGapPx: 640,
+  spawnMaxGapPx: 900,
 
   // Sunset palette.
   skyTop: '#2b1b4a',

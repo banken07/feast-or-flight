@@ -8,6 +8,8 @@ function createTurkey() {
     vy: 0,
     grounded: true,
     ducking: false,
+    wantDuck: false,
+    jumpBuffer: 0,
     runPhase: 0,
     invulnT: 0,
     flapT: 0,
@@ -19,19 +21,26 @@ function turkeyJump(t) {
     t.vy = -CFG.jumpVelocity;
     t.grounded = false;
     t.ducking = false;
+    t.jumpBuffer = 0;
     t.flapT = 0.28;
     AudioSys.jump();
+  } else {
+    // Jump pressed just before landing: remember it briefly so the
+    // turkey jumps the moment its feet touch the ground.
+    t.jumpBuffer = 0.12;
   }
 }
 
 function turkeyDuck(t, on) {
-  if (t.grounded) t.ducking = on;
+  t.wantDuck = on;
 }
 
 function turkeyUpdate(t, dt) {
   t.runPhase += dt * (t.grounded ? 11 : 4);
   if (t.invulnT > 0) t.invulnT -= dt;
   if (t.flapT > 0) t.flapT -= dt;
+  if (t.jumpBuffer > 0) t.jumpBuffer -= dt;
+  t.ducking = t.wantDuck && t.grounded;
   if (!t.grounded) {
     t.vy += CFG.gravity * dt;
     t.y += t.vy * dt;
@@ -40,6 +49,7 @@ function turkeyUpdate(t, dt) {
       t.y = floor;
       t.vy = 0;
       t.grounded = true;
+      if (t.jumpBuffer > 0) turkeyJump(t);
     }
   }
 }

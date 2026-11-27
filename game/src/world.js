@@ -15,7 +15,7 @@ function createWorld(rng) {
   }
   const trees = [];
   for (let i = 0; i < 9; i++) {
-    trees.push({ x: i * 170 + rng.range(-40, 40), h: rng.range(90, 170) });
+    trees.push({ x: i * 170 + rng.range(-40, 40), h: rng.range(80, 140) });
   }
   return { leaves, trees, scroll: 0 };
 }
@@ -94,7 +94,7 @@ function worldDraw(ctx, world, distance, time) {
   for (const tree of world.trees) {
     const tx = ((tree.x - world.scroll * 0.6) % 1600 + 1600) % 1600 - 80;
     ctx.beginPath();
-    ctx.ellipse(tx, CFG.groundY - tree.h, 34, tree.h, 0, 0, Math.PI * 2);
+    ctx.ellipse(tx, CFG.groundY - tree.h, 27, tree.h, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillRect(tx - 5, CFG.groundY - 46, 10, 46);
   }
@@ -132,9 +132,11 @@ function worldDraw(ctx, world, distance, time) {
     ctx.restore();
   }
 
-  // The forest gate at the finish: two great trees and a lit arch.
+  // The forest gate at the finish: two great trees and a lit arch. It
+  // slides in from the right as the run closes and stands at the turkey
+  // when the distance is reached.
   if (distance > CFG.finishDistance - 260) {
-    const gateX = CFG.canvasWidth - (CFG.finishDistance - distance) * 8;
+    const gateX = CFG.turkeyX + (CFG.finishDistance - distance) * 8;
     drawForestGate(ctx, gateX, time);
   }
 }

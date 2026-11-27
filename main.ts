@@ -4,7 +4,7 @@
 // buildDossier from vendor/makefun-game.ts. It runs twice in grading and
 // both runs must write the same bytes, so it does nothing time-dependent:
 // no timestamps, no random choices, no reordering.
-import { cpSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildDossier } from './vendor/makefun-game.ts';
@@ -13,6 +13,15 @@ const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)));
 const outDir = process.env.MAKEFUN_OUTPUT_DIR
   ? resolve(process.env.MAKEFUN_OUTPUT_DIR)
   : '/output';
+
+// Fail fast with a readable message when the entry is incomplete, so a
+// missing game/ or screenshots/ never produces a half-written /output.
+if (!existsSync(join(repoRoot, 'game', 'index.html'))) {
+  throw new Error('main.ts: game/index.html is missing');
+}
+if (!existsSync(join(repoRoot, 'screenshots')) || readdirSync(join(repoRoot, 'screenshots')).length < 3) {
+  throw new Error('main.ts: screenshots/ must hold at least 3 images');
+}
 
 rmSync(outDir, { recursive: true, force: true });
 mkdirSync(outDir, { recursive: true });
@@ -27,3 +36,9 @@ const dossier = buildDossier(outDir, {
   game_max_bytes: 50331648,
 });
 writeFileSync(join(outDir, 'dossier.json'), dossier);
+
+// A short deterministic summary on stdout: the file counts and the
+// dossier size. No timestamps or random values, so the two grading runs
+// stay byte-identical in /output and identical on the console.
+const shotCount = readdirSync(join(outDir, 'screenshots')).length;
+console.log(`feast-or-flight: game/ + ${shotCount} screenshots -> ${outDir} (dossier.json ${dossier.length} bytes)`);

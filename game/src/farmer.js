@@ -97,14 +97,14 @@ function farmerDraw(ctx, turkeyX, gap, time) {
     ctx.lineWidth = 4;
     const label = 'HEY! COME BACK HERE!';
     const w = ctx.measureText(label).width + 20;
-    const bx = x - w / 2;
+    const bx = Math.max(8, x - w / 2);
     const by = y - 168;
     ctx.beginPath();
     ctx.roundRect(bx, by, w, 32, 8);
     ctx.fill();
     ctx.stroke();
     ctx.fillStyle = '#7a1f16';
-    ctx.fillText(label, x, by + 22);
+    ctx.fillText(label, bx + w / 2, by + 22);
     ctx.restore();
   }
 }
