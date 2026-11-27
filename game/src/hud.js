@@ -160,8 +160,10 @@ function hudDrawTitle(ctx, game) {
   ctx.fillText('Outrun him to the Forest Gate — 1000m through the farmyard and the kitchen yard.', w / 2, 322);
 
   // Dark scrim behind the instructions, so the lines never collide with
-  // the barn door or house silhouettes drifting behind them.
-  ctx.fillStyle = 'rgba(26, 12, 32, 0.5)';
+  // the barn door or house silhouettes drifting behind them. v7: alpha
+  // 0.5 let the barn's white X door show through right behind line 3 —
+  // 0.72 buries it while the text on top stays crisp.
+  ctx.fillStyle = 'rgba(26, 12, 32, 0.72)';
   ctx.beginPath();
   ctx.roundRect(w / 2 - 540, 356, 1080, 140, 12);
   ctx.fill();

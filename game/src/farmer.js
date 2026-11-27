@@ -36,9 +36,15 @@ function farmerDraw(ctx, turkeyX, gap, time) {
   ctx.fillRect(-14 + legSwing, -8, 18, 8);
   ctx.fillRect(0 - legSwing, -8, 18, 8);
 
-  // Torso: plaid shirt + overalls.
+  // Torso: plaid shirt + overalls. A thin warm rim, like the turkey's,
+  // so the figure keeps an edge against dark trees — it matters most on
+  // the dimmed end screen, where the farmer otherwise melts into the
+  // background.
   ctx.fillStyle = '#a83226';
   ctx.fillRect(-16, -96, 34, 46);
+  ctx.strokeStyle = '#e8c98a';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(-16, -96, 34, 46);
   ctx.fillStyle = '#7a1f16';
   ctx.fillRect(-16, -80, 34, 5);
   ctx.fillRect(-16, -66, 34, 5);
@@ -85,6 +91,9 @@ function farmerDraw(ctx, turkeyX, gap, time) {
   ctx.beginPath();
   ctx.ellipse(2, -118, 20, 6, 0, 0, Math.PI * 2);
   ctx.fill();
+  ctx.strokeStyle = '#e8c98a';
+  ctx.lineWidth = 2;
+  ctx.stroke();
   ctx.fillRect(-10, -134, 24, 16);
   ctx.fillStyle = '#a83226';
   ctx.fillRect(-10, -122, 24, 4);

@@ -191,13 +191,16 @@ function drawForestGate(ctx, x, time) {
   ctx.beginPath();
   ctx.ellipse(x + 60, CFG.groundY - 190, 60, 190, 0, 0, Math.PI * 2);
   ctx.fill();
-  // Golden light beyond the gate.
-  const glow = ctx.createRadialGradient(x, CFG.groundY - 90, 10, x, CFG.groundY - 90, 130);
-  glow.addColorStop(0, 'rgba(255, 209, 102, 0.95)');
+  // Golden light beyond the gate. v7: the glow was so hot (0.95) it
+  // bleached the turkey's tail where the bird stands in it — 0.7 with a
+  // slightly smaller radius lets the dark green trees show through, so
+  // the orange tail keeps its contrast against the gate.
+  const glow = ctx.createRadialGradient(x, CFG.groundY - 90, 10, x, CFG.groundY - 90, 115);
+  glow.addColorStop(0, 'rgba(255, 209, 102, 0.7)');
   glow.addColorStop(1, 'rgba(255, 209, 102, 0)');
   ctx.fillStyle = glow;
   ctx.beginPath();
-  ctx.arc(x, CFG.groundY - 90, 130, 0, Math.PI * 2);
+  ctx.arc(x, CFG.groundY - 90, 115, 0, Math.PI * 2);
   ctx.fill();
   // Banner: a bright cream panel with dark green text and a dark outline,
   // so the label reads at thumbnail size even under the end-screen dim.

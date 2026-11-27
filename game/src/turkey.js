@@ -188,21 +188,26 @@ function turkeyDraw(ctx, t, time) {
 // The duck pose: squat body, neck stretched forward low, head down near
 // the ground, tail folded flat behind. Local frame: (0,0) is the top of
 // the ducked box, h is the ducked height, the ground is at local y = h.
+// v7: the duck is WIDER, not taller — a longer body, a bigger head
+// stretched further forward, a wider tail fan — so the crouch reads as
+// a substantial bird at thumbnail size instead of a speck. The top edge
+// never rises: the head top stays at local y ~2, still clear of the
+// hanging branch leaves (which end ~6px above the ducked box top).
 function turkeyDrawDuck(ctx, h) {
-  // Tail folded flat behind, pointing back and down.
+  // Tail folded flat behind, pointing back and down — fan spread wider.
   const tailColors = ['#b5541e', '#d97b29', '#8a3b12', '#e8a33d', '#c65a1a'];
   for (let i = 0; i < 5; i++) {
-    const a = 1.15 + i * 0.18;
+    const a = 1.05 + i * 0.24;
     ctx.save();
-    ctx.translate(14, h - 24);
+    ctx.translate(10, h - 24);
     ctx.rotate(a);
     ctx.fillStyle = tailColors[i];
     ctx.beginPath();
-    ctx.ellipse(0, -14, 7, 18, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, -14, 7, 22, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = '#f2d492';
     ctx.beginPath();
-    ctx.ellipse(0, -24, 3, 7, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, -26, 3, 7, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
   }
@@ -221,54 +226,55 @@ function turkeyDrawDuck(ctx, h) {
   // Squat body, wide and flat, with the same warm rim as the standing pose.
   ctx.fillStyle = '#8a5a2b';
   ctx.beginPath();
-  ctx.ellipse(52, h - 16, 38, 15, -0.05, 0, Math.PI * 2);
+  ctx.ellipse(54, h - 16, 50, 15, -0.05, 0, Math.PI * 2);
   ctx.fill();
   ctx.strokeStyle = '#e8c98a';
   ctx.lineWidth = 3;
   ctx.stroke();
   ctx.fillStyle = '#a06a35';
   ctx.beginPath();
-  ctx.ellipse(58, h - 20, 24, 10, -0.05, 0, 0, Math.PI * 2);
+  ctx.ellipse(60, h - 20, 30, 10, -0.05, 0, 0, Math.PI * 2);
   ctx.fill();
 
   // Wing pressed flat along the body.
   ctx.save();
-  ctx.translate(48, h - 18);
+  ctx.translate(52, h - 18);
   ctx.rotate(-0.12);
   ctx.fillStyle = '#6e4520';
   ctx.beginPath();
-  ctx.ellipse(-4, 0, 20, 8, 0, 0, Math.PI * 2);
+  ctx.ellipse(-4, 0, 26, 8, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 
-  // Neck stretched forward, almost horizontal, head low.
+  // Neck stretched forward, almost horizontal, head low — longer and
+  // bigger than before, so the head reads at thumbnail size.
   ctx.fillStyle = '#7a4a22';
   ctx.beginPath();
-  ctx.ellipse(80, h - 26, 15, 7, -0.25, 0, Math.PI * 2);
+  ctx.ellipse(88, h - 26, 18, 7, -0.25, 0, Math.PI * 2);
   ctx.fill();
   ctx.beginPath();
-  ctx.arc(94, h - 32, 11, 0, Math.PI * 2);
+  ctx.arc(102, h - 32, 12.5, 0, Math.PI * 2);
   ctx.fill();
   // Beak.
   ctx.fillStyle = '#f2a541';
   ctx.beginPath();
-  ctx.moveTo(102, h - 36);
-  ctx.lineTo(114, h - 31);
-  ctx.lineTo(102, h - 27);
+  ctx.moveTo(112, h - 36);
+  ctx.lineTo(126, h - 31);
+  ctx.lineTo(112, h - 27);
   ctx.closePath();
   ctx.fill();
   // Wattle.
   ctx.fillStyle = '#d92632';
   ctx.beginPath();
-  ctx.ellipse(92, h - 22, 3.5, 7, 0.3, 0, Math.PI * 2);
+  ctx.ellipse(100, h - 22, 4, 7, 0.3, 0, Math.PI * 2);
   ctx.fill();
   // Eye.
   ctx.fillStyle = '#ffffff';
   ctx.beginPath();
-  ctx.arc(96, h - 35, 3.5, 0, Math.PI * 2);
+  ctx.arc(104, h - 35, 4, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = '#1a1a1a';
   ctx.beginPath();
-  ctx.arc(97, h - 35, 1.8, 0, Math.PI * 2);
+  ctx.arc(105, h - 35, 2, 0, Math.PI * 2);
   ctx.fill();
 }
