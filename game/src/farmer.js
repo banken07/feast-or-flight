@@ -100,8 +100,10 @@ function farmerDraw(ctx, turkeyX, gap, time) {
 
   ctx.restore();
 
-  // Shout bubble when he is dangerously close.
-  if (gap < CFG.gapDanger) {
+  // Shout bubble when he is dangerously close — but not when he is
+  // almost on the turkey: under gapBanner the big "TOO CLOSE!" banner
+  // in hud.js takes over, so the two labels never stack.
+  if (gap < CFG.gapDanger && gap >= CFG.gapBanner) {
     ctx.save();
     ctx.font = 'bold 20px system-ui, sans-serif';
     ctx.textAlign = 'center';

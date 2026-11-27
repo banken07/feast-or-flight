@@ -39,6 +39,10 @@ const CFG = {
   gapHitPenalty: 40,
   gapCornBonus: 3,
   gapDanger: 55,
+  // Visual-only threshold for the big danger banner ("TOO CLOSE!"):
+  // under this gap the banner replaces the small shout bubble. The
+  // chase itself is untouched — only what the player sees changes.
+  gapBanner: 30,
 
   // Lives and score.
   livesStart: 3,

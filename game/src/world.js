@@ -1,6 +1,36 @@
 // Feast or Flight — the sunset farm world.
 // Parallax layers: sky, sun, clouds, hills, farmhouse, barn, trees, then
 // the dirt path the turkey runs on, with drifting autumn leaves.
+
+// Stage palettes: the run's three places share the sunset family but
+// read differently — farmyard (baseline), kitchen yard (warmer, deeper
+// red, kitchen smoke), forest edge (darker, greener, denser trees).
+// Colours blend over 60m around each boundary so the change never pops.
+const STAGE_PALETTES = [
+  { skyTop: '#2b1b4a', skyMid: '#7a2d5e', skyLow: '#e85d3d', horizon: '#f9a03f', hillFar: '#4a2a5e', hillNear: '#3a2048' },
+  { skyTop: '#3a1230', skyMid: '#8f2f42', skyLow: '#f06428', horizon: '#ffb347', hillFar: '#5a2438', hillNear: '#42203a' },
+  { skyTop: '#1a1238', skyMid: '#5e2a55', skyLow: '#c65a3a', horizon: '#e8893f', hillFar: '#2a2a44', hillNear: '#1e3a1e' },
+];
+
+function hexLerp(a, b, t) {
+  const pa = [1, 3, 5].map((i) => parseInt(a.slice(i, i + 2), 16));
+  const pb = [1, 3, 5].map((i) => parseInt(b.slice(i, i + 2), 16));
+  const c = pa.map((v, i) => Math.round(v + (pb[i] - v) * t));
+  return `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
+}
+
+// Which palette pair the distance sits in, and how far the blend has
+// gone (t 0→1 across a 60m window centred on each stage boundary).
+function stageMix(distance) {
+  const K = CFG.stageKitchen;
+  const F = CFG.stageForest;
+  const W = 60;
+  if (distance < K - W / 2) return { from: 0, to: 0, t: 0 };
+  if (distance < K + W / 2) return { from: 0, to: 1, t: (distance - (K - W / 2)) / W };
+  if (distance < F - W / 2) return { from: 1, to: 1, t: 0 };
+  if (distance < F + W / 2) return { from: 1, to: 2, t: (distance - (F - W / 2)) / W };
+  return { from: 2, to: 2, t: 0 };
+}
 function createWorld(rng) {
   const leaves = [];
   for (let i = 0; i < 26; i++) {
@@ -35,12 +65,28 @@ function worldUpdate(world, dt, speed) {
 }
 
 function worldDraw(ctx, world, distance, time) {
+  // Stage identity: the HUD already names the stages, but stages 1 and
+  // 2 used to look identical. Now the whole scene shifts with the run —
+  // sky, hills and trees lerp between the three stage palettes, the
+  // kitchen yard grows chimney smoke, and the forest edge grows denser,
+  // taller, greener trees. Purely visual: distance only drives colours.
+  const mix = stageMix(distance);
+  const pal = {};
+  for (const k of ['skyTop', 'skyMid', 'skyLow', 'horizon', 'hillFar', 'hillNear']) {
+    pal[k] = hexLerp(STAGE_PALETTES[mix.from][k], STAGE_PALETTES[mix.to][k], mix.t);
+  }
+  // kitchenness is 1 inside the kitchen yard and ramps at both edges;
+  // forestness is 0 before the forest and 1 inside it.
+  const kitchenness =
+    mix.from === 1 && mix.to === 1 ? 1 : mix.to === 1 ? mix.t : mix.from === 1 ? 1 - mix.t : 0;
+  const forestness = mix.to === 2 ? mix.t : mix.from === 2 ? 1 : 0;
+
   // Sunset sky.
   const sky = ctx.createLinearGradient(0, 0, 0, CFG.groundY);
-  sky.addColorStop(0, CFG.skyTop);
-  sky.addColorStop(0.45, CFG.skyMid);
-  sky.addColorStop(0.8, CFG.skyLow);
-  sky.addColorStop(1, CFG.horizon);
+  sky.addColorStop(0, pal.skyTop);
+  sky.addColorStop(0.45, pal.skyMid);
+  sky.addColorStop(0.8, pal.skyLow);
+  sky.addColorStop(1, pal.horizon);
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, CFG.canvasWidth, CFG.groundY + 2);
 
@@ -71,8 +117,24 @@ function worldDraw(ctx, world, distance, time) {
     ctx.fill();
   }
 
+  // Distant birds crossing the upper sky — a little life in the open
+  // upper-right of the cover, small dark strokes that read as birds
+  // without cluttering the frame.
+  ctx.strokeStyle = 'rgba(43, 27, 74, 0.8)';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  for (let i = 0; i < 5; i++) {
+    const bx = (((1180 + i * 62 - world.scroll * 0.05) % 1400) + 1400) % 1400 - 60;
+    const by = 128 + (i % 3) * 30 + Math.sin(time * 0.8 + i) * 4;
+    ctx.beginPath();
+    ctx.moveTo(bx - 8, by + 3);
+    ctx.lineTo(bx, by - 3);
+    ctx.lineTo(bx + 8, by + 3);
+    ctx.stroke();
+  }
+
   // Far hills.
-  ctx.fillStyle = CFG.hillFar;
+  ctx.fillStyle = pal.hillFar;
   ctx.beginPath();
   ctx.moveTo(0, 520);
   for (let x = 0; x <= CFG.canvasWidth; x += 80) {
@@ -89,14 +151,48 @@ function worldDraw(ctx, world, distance, time) {
   drawFarmhouse(ctx, farmX + 760, 470);
   drawBarn(ctx, farmX + 420, 500);
 
-  // Trees (parallax 0.6).
-  ctx.fillStyle = CFG.hillNear;
+  // Kitchen-yard smoke: in stage 2 the ovens are cooking, so the
+  // farmhouse chimneys breathe harder — extra puffs rising above the
+  // houses, fading in and out with the stage blend.
+  if (kitchenness > 0.03) {
+    ctx.fillStyle = `rgba(230, 220, 240, ${0.28 * kitchenness})`;
+    for (const cx of [farmX + 118, farmX + 878]) {
+      for (let i = 0; i < 3; i++) {
+        const rise = (time * 12 + i * 45) % 135;
+        const px = cx + Math.sin(time + i * 2) * 6;
+        const py = 470 - 150 - rise;
+        ctx.beginPath();
+        ctx.arc(px, py, 8 + i * 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  // Trees (parallax 0.6). In the forest edge they grow denser, taller
+  // and greener: the colour lerps purple → dark green with the stage
+  // blend, the height scales up, and a second row of trees fades in.
+  ctx.fillStyle = pal.hillNear;
+  const treeHScale = 1 + 0.35 * forestness;
   for (const tree of world.trees) {
     const tx = ((tree.x - world.scroll * 0.6) % 1600 + 1600) % 1600 - 80;
+    const th = tree.h * treeHScale;
     ctx.beginPath();
-    ctx.ellipse(tx, CFG.groundY - tree.h, 27, tree.h, 0, 0, Math.PI * 2);
+    ctx.ellipse(tx, CFG.groundY - th, 27, th, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillRect(tx - 5, CFG.groundY - 46, 10, 46);
+  }
+  if (forestness > 0.03) {
+    ctx.save();
+    ctx.globalAlpha = forestness * 0.9;
+    for (const tree of world.trees) {
+      const tx = ((tree.x + 85 - world.scroll * 0.6) % 1600 + 1600) % 1600 - 80;
+      const th = tree.h * 0.8 * treeHScale;
+      ctx.beginPath();
+      ctx.ellipse(tx, CFG.groundY - th, 22, th, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillRect(tx - 4, CFG.groundY - 40, 8, 40);
+    }
+    ctx.restore();
   }
 
   // Ground.

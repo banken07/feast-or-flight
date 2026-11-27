@@ -118,18 +118,33 @@ function hudDraw(ctx, game) {
     ctx.fillRect(0, 0, CFG.canvasWidth, CFG.canvasHeight);
   }
 
-  // Mute note on its own dark pill, so it reads on the brown ground
-  // instead of dissolving into it.
-  const muteLabel = game.muted ? 'M — sound off' : 'M — sound on';
-  ctx.textAlign = 'right';
-  ctx.font = '14px system-ui, sans-serif';
-  const muteW = ctx.measureText(muteLabel).width;
-  ctx.fillStyle = 'rgba(26, 12, 32, 0.78)';
-  ctx.beginPath();
-  ctx.roundRect(w - 22 - muteW - 16, CFG.canvasHeight - 36, muteW + 16, 24, 12);
-  ctx.fill();
-  ctx.fillStyle = '#ffe9b8';
-  ctx.fillText(muteLabel, w - 22, CFG.canvasHeight - 18);
+  // Big dramatic banner when the farmer is almost on the turkey — the
+  // labelled moment the field's strong entries have ("SPOTTED!",
+  // "PARDON ME!") and we lacked: our only warning was the small shout
+  // bubble. Triggered by the gap the chase already tracks; visual only.
+  // It replaces the bubble under gapBanner, so only one warning shows.
+  if (game.gap < CFG.gapBanner && (game.state === 'playing' || game.state === 'paused')) {
+    const label = 'TOO CLOSE!';
+    ctx.save();
+    ctx.translate(CFG.canvasWidth / 2, 112);
+    ctx.scale(1 + 0.03 * Math.sin(game.time * 8), 1 + 0.03 * Math.sin(game.time * 8));
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 52px system-ui, sans-serif';
+    const w = ctx.measureText(label).width + 48;
+    ctx.fillStyle = 'rgba(122, 20, 16, 0.9)';
+    ctx.beginPath();
+    ctx.roundRect(-w / 2, -38, w, 64, 12);
+    ctx.fill();
+    ctx.strokeStyle = '#ffd166';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.shadowColor = 'rgba(20, 8, 30, 0.6)';
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetY = 4;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(label, 0, 8);
+    ctx.restore();
+  }
 }
 
 function hudDrawTitle(ctx, game) {
