@@ -25,10 +25,15 @@ const CFG = {
   jumpVelocity: 1000,
   gravity: 2900,
 
-  // Run.
+  // Run. v15: the ramp is steep now — Ban: "makin lama makin cepat,
+  // jangan lambat terus". Old ramp (0.26/m, cap 640) only reached 640
+  // exactly at the 1000m finish, so the run felt slow throughout
+  // (380 at 0m, 458 at 300m, 549 at 650m). New: 0.62/m, cap 1000 —
+  // 380 at 0m, 566 at 300m, 783 at 650m, 1000 at the gate. Run time
+  // drops from ~33s to ~26s. The cap binds exactly at the finish.
   baseSpeed: 380,
-  maxSpeed: 640,
-  speedPerMeter: 0.26,
+  maxSpeed: 1000,
+  speedPerMeter: 0.62,
   metersPerPixel: 0.06,
 
   // Farmer chase. The gap is the distance in pixels between the farmer
@@ -52,11 +57,17 @@ const CFG = {
   pieScore: 150,
   distanceScorePerMeter: 10,
 
-  // Spawning (seconds between obstacle groups, scaled by speed).
-  // The minimum gap leaves room to land one jump before the next
-  // obstacle arrives, so a narrow escape stays fair at top speed.
-  spawnMinGapPx: 640,
-  spawnMaxGapPx: 900,
+  // Spawning: SECONDS between obstacle groups. v15: the gap is a time,
+  // not a distance — the spatial gap scales with speed automatically
+  // (gapPx = gapSec * speed), so the landing margin is the same at
+  // 380 and at 1000 px/s. Jump air time is 2*1000/2900 = 0.69s, so
+  // the minimum gap must stay above 0.69s + ~0.2s to land and react:
+  // 0.95s leaves 0.26s of margin at any speed. Old px gaps (640-900)
+  // gave only 0.64s at 1000 px/s — less than one jump — so they had
+  // to go. At 1000 px/s the spatial gap is 950-1450px; a jump covers
+  // 690px, so the turkey always lands with room before the next group.
+  spawnMinGapSec: 0.95,
+  spawnMaxGapSec: 1.45,
 
   // Sunset palette.
   skyTop: '#2b1b4a',

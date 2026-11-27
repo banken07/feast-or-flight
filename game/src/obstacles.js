@@ -77,8 +77,9 @@ function obstacleUpdate(field, dt, speed, distance, rng) {
   field.timer -= dt;
   if (field.timer <= 0) {
     spawnObstacleGroup(field, rng, distance, speed);
-    const gapPx = rng.range(CFG.spawnMinGapPx, CFG.spawnMaxGapPx);
-    field.timer = gapPx / speed;
+    // v15: the gap is a time (spawnMinGapSec..spawnMaxGapSec), so the
+    // px spacing grows with speed and the landing margin stays constant.
+    field.timer = rng.range(CFG.spawnMinGapSec, CFG.spawnMaxGapSec);
   }
   for (const it of field.items) {
     it.x -= speed * dt;
