@@ -119,11 +119,15 @@ function turkeyDraw(ctx, t, time) {
   ctx.lineTo(58 - legSwing, CFG.turkeyHeight);
   ctx.stroke();
 
-  // Body.
+  // Body, with a warm rim so it stays readable against the dark purple
+  // hills and trees behind it, even at thumbnail size.
   ctx.fillStyle = '#8a5a2b';
   ctx.beginPath();
   ctx.ellipse(50, h - 30, 34, 26, -0.15, 0, Math.PI * 2);
   ctx.fill();
+  ctx.strokeStyle = '#e8c98a';
+  ctx.lineWidth = 3;
+  ctx.stroke();
   ctx.fillStyle = '#a06a35';
   ctx.beginPath();
   ctx.ellipse(56, h - 36, 22, 16, -0.2, 0, Math.PI * 2);
@@ -206,11 +210,14 @@ function turkeyDrawDuck(ctx, h) {
   ctx.lineTo(62, h);
   ctx.stroke();
 
-  // Squat body, wide and flat.
+  // Squat body, wide and flat, with the same warm rim as the standing pose.
   ctx.fillStyle = '#8a5a2b';
   ctx.beginPath();
   ctx.ellipse(52, h - 16, 38, 15, -0.05, 0, Math.PI * 2);
   ctx.fill();
+  ctx.strokeStyle = '#e8c98a';
+  ctx.lineWidth = 3;
+  ctx.stroke();
   ctx.fillStyle = '#a06a35';
   ctx.beginPath();
   ctx.ellipse(58, h - 20, 24, 10, -0.05, 0, 0, Math.PI * 2);

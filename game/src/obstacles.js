@@ -220,11 +220,15 @@ function drawKnifeCart(ctx, it) {
   ctx.arc(it.x + 18, y - 12, 5, 0, Math.PI * 2);
   ctx.arc(it.x + it.w - 18, y - 12, 5, 0, Math.PI * 2);
   ctx.fill();
-  // Cart body.
-  ctx.fillStyle = '#6b4423';
+  // Cart body: warm brown with a light rim, so the cart reads as a solid
+  // shape against the dark ground instead of vanishing into it.
+  ctx.fillStyle = '#7d4f27';
   ctx.beginPath();
   ctx.roundRect(it.x, y - 46, it.w, 26, 6);
   ctx.fill();
+  ctx.strokeStyle = '#c98d4e';
+  ctx.lineWidth = 2;
+  ctx.stroke();
   ctx.fillStyle = '#8a5a30';
   ctx.fillRect(it.x + 4, y - 46, it.w - 8, 6);
   // The giant carving knife, blade up, glinting.
@@ -273,9 +277,10 @@ function drawBranch(ctx, it) {
   ctx.moveTo(it.x + 4, y - 6);
   ctx.lineTo(it.x + it.w - 2, y - 10);
   ctx.stroke();
-  // Leaves above the limb, orange mixed with green so the branch reads
-  // as foliage and not as the turkey's tail feathers.
-  const leafColors = ['#c65a1a', '#e8a33d', '#7a8a3d', '#d97b29', '#5a6b2f'];
+  // Leaves above the limb: bright greens only, so the branch never shares
+  // a colour with the turkey's orange tail feathers — at thumbnail size
+  // the two must stay separate shapes, not one orange blob.
+  const leafColors = ['#58c24a', '#7ed957', '#4caf50', '#8bc34a', '#66bb6a'];
   for (let i = 0; i < 8; i++) {
     const lx = it.x + 8 + i * 15;
     ctx.fillStyle = leafColors[i % leafColors.length];
@@ -306,6 +311,10 @@ function drawCorn(ctx, it, time) {
   ctx.beginPath();
   ctx.ellipse(it.x + 13, it.y + 13 + bob, 10, 13, 0.2, 0, Math.PI * 2);
   ctx.fill();
+  // Dark rim so the cob pops against dark tree silhouettes.
+  ctx.strokeStyle = '#8a5a00';
+  ctx.lineWidth = 2;
+  ctx.stroke();
   ctx.fillStyle = '#f2b705';
   ctx.fillRect(it.x + 9, it.y + 4 + bob, 3, 18);
   ctx.fillRect(it.x + 14, it.y + 4 + bob, 3, 18);

@@ -70,28 +70,31 @@ function hudDraw(ctx, game) {
   const meterX = 22;
   const meterY = CFG.canvasHeight - 52;
   const meterW = 260;
-  ctx.fillStyle = 'rgba(26, 12, 32, 0.62)';
+  ctx.fillStyle = 'rgba(26, 12, 32, 0.78)';
   ctx.beginPath();
   ctx.roundRect(meterX - 10, meterY - 26, meterW + 20, 44, 8);
   ctx.fill();
-  ctx.fillStyle = '#ff6b5e';
+  ctx.strokeStyle = 'rgba(255, 209, 102, 0.55)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  ctx.fillStyle = '#ff8a7a';
   ctx.font = 'bold 15px system-ui, sans-serif';
   ctx.textAlign = 'left';
   ctx.fillText('FARMER', meterX, meterY - 6);
   const gapFrac = Math.max(0, Math.min(1, game.gap / CFG.gapMax));
   const trackY = meterY + 6;
   ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
-  ctx.fillRect(meterX, trackY, meterW, 6);
+  ctx.fillRect(meterX, trackY, meterW, 8);
   ctx.fillStyle = gapFrac > 0.28 ? '#7ddb6a' : '#ff6b5e';
-  ctx.fillRect(meterX, trackY, meterW * gapFrac, 6);
+  ctx.fillRect(meterX, trackY, meterW * gapFrac, 8);
   // Farmer dot and turkey dot.
   ctx.fillStyle = '#a83226';
   ctx.beginPath();
-  ctx.arc(meterX + 8, trackY + 3, 8, 0, Math.PI * 2);
+  ctx.arc(meterX + 8, trackY + 4, 8, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = '#ffd166';
   ctx.beginPath();
-  ctx.arc(meterX + 8 + meterW * gapFrac, trackY + 3, 8, 0, Math.PI * 2);
+  ctx.arc(meterX + 8 + meterW * gapFrac, trackY + 4, 8, 0, Math.PI * 2);
   ctx.fill();
 
   // Danger vignette when the farmer is close.
@@ -107,11 +110,18 @@ function hudDraw(ctx, game) {
     ctx.fillRect(0, 0, CFG.canvasWidth, CFG.canvasHeight);
   }
 
-  // Mute note.
+  // Mute note on its own dark pill, so it reads on the brown ground
+  // instead of dissolving into it.
+  const muteLabel = game.muted ? 'M — sound off' : 'M — sound on';
   ctx.textAlign = 'right';
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
   ctx.font = '14px system-ui, sans-serif';
-  ctx.fillText(game.muted ? 'M — sound off' : 'M — sound on', w - 22, CFG.canvasHeight - 18);
+  const muteW = ctx.measureText(muteLabel).width;
+  ctx.fillStyle = 'rgba(26, 12, 32, 0.78)';
+  ctx.beginPath();
+  ctx.roundRect(w - 22 - muteW - 16, CFG.canvasHeight - 36, muteW + 16, 24, 12);
+  ctx.fill();
+  ctx.fillStyle = '#ffe9b8';
+  ctx.fillText(muteLabel, w - 22, CFG.canvasHeight - 18);
 }
 
 function hudDrawTitle(ctx, game) {
@@ -133,6 +143,13 @@ function hudDrawTitle(ctx, game) {
   ctx.fillText('Thanksgiving is coming. The farmer wants dinner. You are dinner.', w / 2, 292);
   ctx.fillText('Outrun him to the Forest Gate — 1000m through the farmyard and the kitchen yard.', w / 2, 322);
 
+  // Dark scrim behind the instructions, so the lines never collide with
+  // the barn door or house silhouettes drifting behind them.
+  ctx.fillStyle = 'rgba(26, 12, 32, 0.5)';
+  ctx.beginPath();
+  ctx.roundRect(w / 2 - 540, 356, 1080, 140, 12);
+  ctx.fill();
+
   // How to play, with drawn mini icons.
   ctx.font = 'bold 22px system-ui, sans-serif';
   ctx.fillStyle = '#ffd166';
@@ -146,7 +163,7 @@ function hudDrawTitle(ctx, game) {
   // Start button.
   drawButton(ctx, w / 2 - 190, 520, 380, 62, 'CLICK OR PRESS SPACE TO RUN');
   ctx.font = '16px system-ui, sans-serif';
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+  ctx.fillStyle = '#ffe9b8';
   ctx.fillText('P — pause      M — sound      R — restart', w / 2, 622);
   if (game.best > 0) {
     ctx.fillStyle = '#ffd166';

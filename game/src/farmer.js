@@ -9,7 +9,10 @@ function createFarmer() {
 }
 
 function farmerDraw(ctx, turkeyX, gap, time) {
-  const x = turkeyX - gap - 70;
+  // Never let the figure be cut at the left edge: when the gap is at its
+  // widest (run start, or the escaped end screen) he would otherwise show
+  // as a stray sliver of hat and pitchfork.
+  const x = Math.max(20, turkeyX - gap - 70);
   const y = CFG.groundY;
   const legSwing = Math.sin(time * 11) * 12;
   const bob = Math.abs(Math.sin(time * 11)) * 3;
