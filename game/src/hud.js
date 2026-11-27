@@ -173,9 +173,10 @@ function hudDrawTitle(ctx, game) {
   ctx.font = '19px system-ui, sans-serif';
   ctx.fillStyle = '#ffffff';
   ctx.fillText('SPACE / CLICK — jump      DOWN — duck under low branches', w / 2, 414);
-  // Line 2 is the longest: it starts at x ~325, clear of the 1.9x
-  // bird's beak (which reaches x ~296 on the title screen). Keep it
-  // short enough that the turkey never covers its first word.
+  // Line 2 is the longest: it starts at x ~325, clear of the 1.6x
+  // bird's beak (which reaches x ~279 on the title screen, after the
+  // 90px left shift). Keep it short enough that the turkey never
+  // covers its first word.
   ctx.fillText('Jump the fences, hay bales, ovens and knife carts. Grab corn for points.', w / 2, 444);
   ctx.fillText('Three feathers gone — or the gap gone — and you are caught.', w / 2, 474);
 

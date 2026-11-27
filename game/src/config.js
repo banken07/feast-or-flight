@@ -16,10 +16,11 @@ const CFG = {
   // screen (field covers show heroes 1.5-3x ours; the strongest, Gobble
   // Dash, is ~290px tall at 1280-wide) while the hitbox, jump physics
   // and floor all keep using turkeyWidth/turkeyHeight, so the run plays
-  // exactly as before. At 1.9 the tail stands ~205px tall. The duck
-  // pose is NOT scaled: its head must stay clear of the hanging branch
-  // leaves.
-  turkeyDrawScale: 1.9,
+  // exactly as before. v4 at 1.3 was ~140px (too small), v5 at 1.9 was
+  // ~205px (too big, per Ban) — 1.6 lands ~172px, between the two. The
+  // duck pose is NOT scaled: its head must stay clear of the hanging
+  // branch leaves.
+  turkeyDrawScale: 1.6,
   jumpVelocity: 1000,
   gravity: 2900,
 
