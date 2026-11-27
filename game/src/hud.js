@@ -15,15 +15,23 @@ function hudDraw(ctx, game) {
   ctx.font = 'bold 26px system-ui, sans-serif';
   ctx.fillText('SCORE ' + String(game.score).padStart(5, '0'), 22, 40);
 
-  // Distance + progress bar, center.
+  // Distance + progress bar, center. The stage name rides on the same
+  // line, so the run reads as three places (farmyard, kitchen yard,
+  // forest edge) instead of one endless field.
   const barX = 430;
   const barW = 420;
   const frac = Math.min(1, game.distance / CFG.finishDistance);
+  const stageName =
+    game.distance < CFG.stageKitchen
+      ? 'STAGE 1 · FARMYARD'
+      : game.distance < CFG.stageForest
+        ? 'STAGE 2 · KITCHEN YARD'
+        : 'STAGE 3 · FOREST EDGE';
   ctx.fillStyle = '#ffffff';
   ctx.font = 'bold 20px system-ui, sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText(
-    'DISTANCE ' + Math.floor(game.distance) + 'm / ' + CFG.finishDistance + 'm',
+    'DISTANCE ' + Math.floor(game.distance) + 'm / ' + CFG.finishDistance + 'm · ' + stageName,
     barX + barW / 2, 26,
   );
   ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
@@ -78,9 +86,9 @@ function hudDraw(ctx, game) {
   ctx.lineWidth = 1.5;
   ctx.stroke();
   ctx.fillStyle = '#ff8a7a';
-  ctx.font = 'bold 15px system-ui, sans-serif';
+  ctx.font = 'bold 18px system-ui, sans-serif';
   ctx.textAlign = 'left';
-  ctx.fillText('FARMER', meterX, meterY - 6);
+  ctx.fillText('FARMER JOE', meterX, meterY - 6);
   const gapFrac = Math.max(0, Math.min(1, game.gap / CFG.gapMax));
   const trackY = meterY + 6;
   ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
@@ -131,16 +139,24 @@ function hudDrawTitle(ctx, game) {
   ctx.fillRect(0, 0, w, h);
 
   ctx.textAlign = 'center';
+  // Display treatment: a soft drop shadow lifts the flat cream title
+  // off the dark sky (field titles use shadow/outline/serif for this).
+  ctx.shadowColor = 'rgba(20, 8, 30, 0.55)';
+  ctx.shadowBlur = 14;
+  ctx.shadowOffsetY = 5;
   ctx.fillStyle = '#ffd166';
   ctx.font = 'bold 92px system-ui, sans-serif';
   ctx.fillText('FEAST OR FLIGHT', w / 2, 190);
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetY = 0;
   ctx.fillStyle = '#ffffff';
   ctx.font = 'bold 34px system-ui, sans-serif';
   ctx.fillText("The Turkey's Great Escape", w / 2, 242);
 
   ctx.font = '20px system-ui, sans-serif';
   ctx.fillStyle = '#ffe9b8';
-  ctx.fillText('Thanksgiving is coming. The farmer wants dinner. You are dinner.', w / 2, 292);
+  ctx.fillText('Thanksgiving is coming. Farmer Joe wants dinner. You are dinner.', w / 2, 292);
   ctx.fillText('Outrun him to the Forest Gate — 1000m through the farmyard and the kitchen yard.', w / 2, 322);
 
   // Dark scrim behind the instructions, so the lines never collide with
@@ -158,13 +174,21 @@ function hudDrawTitle(ctx, game) {
   ctx.fillStyle = '#ffffff';
   ctx.fillText('SPACE / CLICK — jump      DOWN — duck under low branches', w / 2, 414);
   ctx.fillText('Jump the fences, hay bales, the glowing oven and the knife cart. Grab corn for points.', w / 2, 444);
-  ctx.fillText('Every stumble lets the farmer close in. Three feathers gone — or the gap gone — and you are caught.', w / 2, 474);
+  ctx.fillText('Three feathers gone — or the gap gone — and you are caught.', w / 2, 474);
 
   // Start button.
   drawButton(ctx, w / 2 - 190, 520, 380, 62, 'CLICK OR PRESS SPACE TO RUN');
+  // Footer on its own dark pill (like the mute note), so it reads on the
+  // brown ground instead of dissolving into it.
+  const footerLabel = 'P — pause      M — sound      R — restart';
   ctx.font = '16px system-ui, sans-serif';
+  const footerW = ctx.measureText(footerLabel).width;
+  ctx.fillStyle = 'rgba(26, 12, 32, 0.78)';
+  ctx.beginPath();
+  ctx.roundRect(w / 2 - footerW / 2 - 14, 602, footerW + 28, 28, 12);
+  ctx.fill();
   ctx.fillStyle = '#ffe9b8';
-  ctx.fillText('P — pause      M — sound      R — restart', w / 2, 622);
+  ctx.fillText(footerLabel, w / 2, 622);
   if (game.best > 0) {
     ctx.fillStyle = '#ffd166';
     ctx.font = 'bold 18px system-ui, sans-serif';

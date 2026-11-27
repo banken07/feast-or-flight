@@ -12,6 +12,12 @@ const CFG = {
   turkeyWidth: 92,
   turkeyHeight: 84,
   turkeyDuckHeight: 46,
+  // Draw-only scale for the standing pose: the bird renders bigger on
+  // screen (field covers show heroes 1.5-3x ours) while the hitbox,
+  // jump physics and floor all keep using turkeyWidth/turkeyHeight, so
+  // the run plays exactly as before. The duck pose is NOT scaled: its
+  // head must stay clear of the hanging branch leaves.
+  turkeyDrawScale: 1.3,
   jumpVelocity: 1000,
   gravity: 2900,
 

@@ -146,8 +146,13 @@ function gameDraw() {
   // On the title screen the farmer stands a little closer in, so his
   // whole figure is inside the frame instead of being cut at the edge.
   const farmerGap = Game.state === 'title' ? 84 : Game.gap;
-  farmerDraw(ctx, Game.turkey.x, farmerGap, Game.time);
-  turkeyDraw(ctx, Game.turkey, Game.time);
+  // On the title screen the farmer and the turkey are drawn AFTER the
+  // overlay, so the turkey's fanned tail and the farmer's pitchfork sit
+  // in front of the instructions scrim instead of dimming behind it.
+  if (Game.state !== 'title') {
+    farmerDraw(ctx, Game.turkey.x, farmerGap, Game.time);
+    turkeyDraw(ctx, Game.turkey, Game.time);
+  }
   ctx.restore();
 
   if (Game.state === 'playing' || Game.state === 'paused') {
@@ -155,6 +160,8 @@ function gameDraw() {
     if (Game.state === 'paused') hudDrawPause(ctx);
   } else if (Game.state === 'title') {
     hudDrawTitle(ctx, Game);
+    farmerDraw(ctx, Game.turkey.x, farmerGap, Game.time);
+    turkeyDraw(ctx, Game.turkey, Game.time);
   } else {
     hudDraw(ctx, Game);
     hudDrawEnd(ctx, Game);

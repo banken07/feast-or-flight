@@ -90,6 +90,14 @@ function turkeyDraw(ctx, t, time) {
     return;
   }
 
+  // Standing pose renders bigger than the hitbox (see turkeyDrawScale):
+  // scale about the feet so the bird stays planted on the ground while
+  // its tail, body and head all grow toward the sky.
+  const s = CFG.turkeyDrawScale;
+  ctx.translate(46, h);
+  ctx.scale(s, s);
+  ctx.translate(-46, -h);
+
   // Fanned tail feathers.
   const tailColors = ['#b5541e', '#d97b29', '#8a3b12', '#e8a33d', '#c65a1a'];
   for (let i = 0; i < 5; i++) {
