@@ -160,8 +160,15 @@ function gameDraw() {
     if (Game.state === 'paused') hudDrawPause(ctx);
   } else if (Game.state === 'title') {
     hudDrawTitle(ctx, Game);
-    farmerDraw(ctx, Game.turkey.x, farmerGap, Game.time);
+    // The 1.9x bird would cover the left end of the instruction lines
+    // (its beak reaches x ~386, line 2 starts ~x 222), so on the title
+    // screen the farmer and the turkey stand 90px further left, clear
+    // of the text. Relative spacing is unchanged; only the pair moves.
+    farmerDraw(ctx, Game.turkey.x - 90, farmerGap, Game.time);
+    ctx.save();
+    ctx.translate(-90, 0);
     turkeyDraw(ctx, Game.turkey, Game.time);
+    ctx.restore();
   } else {
     hudDraw(ctx, Game);
     hudDrawEnd(ctx, Game);

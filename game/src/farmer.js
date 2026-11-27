@@ -102,7 +102,10 @@ function farmerDraw(ctx, turkeyX, gap, time) {
     const label = 'HEY! COME BACK HERE!';
     const w = ctx.measureText(label).width + 20;
     const bx = Math.max(8, x - w / 2);
-    const by = y - 168;
+    // High under the HUD, not above the farmer's head: the 1.9x bird's
+    // tail reaches y ~223 even mid-jump, so a bubble at head height
+    // would hide behind it. Up here it clears the bird in every phase.
+    const by = 150;
     ctx.beginPath();
     ctx.roundRect(bx, by, w, 32, 8);
     ctx.fill();
