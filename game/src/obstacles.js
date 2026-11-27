@@ -130,7 +130,7 @@ function obstacleDraw(ctx, field, time) {
     else if (it.kind === 'hay') drawHay(ctx, it);
     else if (it.kind === 'oven') drawOven(ctx, it, time);
     else if (it.kind === 'knife') drawKnifeCart(ctx, it);
-    else if (it.kind === 'branch') drawBranch(ctx, it);
+    else if (it.kind === 'branch') drawBranch(ctx, it, time);
     else if (it.kind === 'corn') drawCorn(ctx, it, time);
     else if (it.kind === 'feather') drawFeather(ctx, it, time);
     else if (it.kind === 'pie') drawPie(ctx, it);
@@ -262,50 +262,127 @@ function drawKnifeCart(ctx, it) {
   ctx.fill();
 }
 
-// A low branch with autumn leaves: duck under it. Drawn thick, with
-// leaves above and a few hanging below the limb, so it reads as an
-// overhead branch at a glance — not a streak across the turkey.
-function drawBranch(ctx, it) {
+// A low branch with autumn leaves: duck under it. Redrawn v13 to read as
+// a real TREE at a glance — a gnarled, tapered limb with bark, a forked
+// twig, and a two-layer leaf canopy — not a floating stick with a row of
+// blobs. Geometry budget (measured, do not break): hitbox is
+// groundY-84..groundY-46 (y 516..554); the ducked turkey's head top is at
+// y 554, so NOTHING may hang below y ~548. Leaves stay bright greens
+// only — never orange — so at thumbnail size the canopy never merges
+// with the turkey's orange tail feathers into one blob.
+function drawBranch(ctx, it, time) {
   const y = CFG.groundY - 84;
-  // Main limb.
-  ctx.strokeStyle = '#4a2e16';
-  ctx.lineWidth = 16;
-  ctx.lineCap = 'round';
-  ctx.beginPath();
-  ctx.moveTo(it.x - 6, y + 8);
-  ctx.lineTo(it.x + it.w + 6, y + 2);
-  ctx.stroke();
-  // Second, thinner limb above it for mass.
-  ctx.strokeStyle = '#5a3a1e';
-  ctx.lineWidth = 8;
-  ctx.beginPath();
-  ctx.moveTo(it.x + 4, y - 6);
-  ctx.lineTo(it.x + it.w - 2, y - 10);
-  ctx.stroke();
-  // Leaves above the limb: bright greens only, so the branch never shares
-  // a colour with the turkey's orange tail feathers — at thumbnail size
-  // the two must stay separate shapes, not one orange blob.
-  const leafColors = ['#58c24a', '#7ed957', '#4caf50', '#8bc34a', '#66bb6a'];
-  for (let i = 0; i < 8; i++) {
-    const lx = it.x + 8 + i * 15;
-    ctx.fillStyle = leafColors[i % leafColors.length];
+  const x = it.x;
+  const w = it.w;
+  // Gentle canopy sway, deterministic (game time only, no random).
+  const sway = Math.sin(time * 1.6 + x * 0.02) * 1.5;
+
+  // --- Back canopy layer: darker greens, bigger bumpy cloud. ---
+  // Hand-placed (identical for every branch, like the fence) so the shape
+  // never shimmers as the item scrolls.
+  const backLeaves = [
+    // [dx, dy, rx, ry, rot]
+    [6, -26, 15, 10, 0.3], [26, -32, 16, 11, -0.2], [48, -28, 15, 10, 0.4],
+    [70, -33, 16, 11, -0.3], [92, -28, 15, 10, 0.2], [110, -24, 13, 9, -0.4],
+    [16, -16, 13, 9, -0.3], [58, -18, 14, 9, 0.3], [100, -15, 12, 8, 0.2],
+  ];
+  const backColors = ['#2e7d32', '#388e3c', '#43a047'];
+  for (let i = 0; i < backLeaves.length; i++) {
+    const L = backLeaves[i];
+    ctx.fillStyle = backColors[i % backColors.length];
     ctx.beginPath();
-    ctx.ellipse(lx, y - 8 + (i % 2) * 8, 11, 7, 0.5, 0, Math.PI * 2);
+    ctx.ellipse(x + L[0] + sway, y + L[1], L[2], L[3], L[4], 0, Math.PI * 2);
     ctx.fill();
   }
-  // Leaves hanging below the limb: the underside edge a ducking turkey
-  // slips under.
-  for (let i = 0; i < 4; i++) {
-    const lx = it.x + 18 + i * 28;
+
+  // --- Forked twig rising from the middle of the limb. ---
+  ctx.strokeStyle = '#5a3a1e';
+  ctx.lineWidth = 6;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(x + w * 0.55, y + 2);
+  ctx.quadraticCurveTo(x + w * 0.68, y - 14, x + w * 0.8, y - 26 + sway);
+  ctx.stroke();
+  // Small leaf cluster at the twig tip.
+  ctx.fillStyle = '#7ed957';
+  ctx.beginPath();
+  ctx.ellipse(x + w * 0.8 + sway, y - 30, 10, 7, 0.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#58c24a';
+  ctx.beginPath();
+  ctx.ellipse(x + w * 0.8 - 8 + sway, y - 25, 8, 6, -0.4, 0, Math.PI * 2);
+  ctx.fill();
+
+  // --- Main limb: tapered, gently S-curved, with bark. ---
+  // Thick at the left (cut end, where it joins the off-screen trunk),
+  // tapering to a point at the right tip.
+  ctx.fillStyle = '#4a2e16';
+  ctx.beginPath();
+  ctx.moveTo(x - 10, y - 2);
+  ctx.quadraticCurveTo(x + w * 0.35, y - 8, x + w * 0.62, y - 2);
+  ctx.quadraticCurveTo(x + w * 0.85, y + 2, x + w + 10, y - 2);
+  ctx.quadraticCurveTo(x + w * 0.85, y + 8, x + w * 0.6, y + 8);
+  ctx.quadraticCurveTo(x + w * 0.3, y + 12, x - 10, y + 12);
+  ctx.closePath();
+  ctx.fill();
+  // Bark: two dark grain lines following the limb's curve.
+  ctx.strokeStyle = '#33200e';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x - 6, y + 2);
+  ctx.quadraticCurveTo(x + w * 0.4, y - 2, x + w * 0.9, y + 1);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x - 4, y + 8);
+  ctx.quadraticCurveTo(x + w * 0.45, y + 5, x + w * 0.85, y + 6);
+  ctx.stroke();
+  // Bark highlight along the top edge (sunlit side).
+  ctx.strokeStyle = '#7a5230';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x - 6, y - 1);
+  ctx.quadraticCurveTo(x + w * 0.4, y - 6, x + w * 0.8, y - 1);
+  ctx.stroke();
+  // Cut end at the left: darker cap so the limb reads as sawn off a
+  // trunk just off-screen, not floating.
+  ctx.fillStyle = '#33200e';
+  ctx.beginPath();
+  ctx.ellipse(x - 9, y + 5, 4, 8, 0.15, 0, Math.PI * 2);
+  ctx.fill();
+
+  // --- Front canopy layer: bright greens, overlapping the limb top. ---
+  const frontLeaves = [
+    // [dx, dy, rx, ry, rot]
+    [2, -14, 12, 8, 0.4], [20, -20, 13, 9, -0.3], [38, -14, 11, 8, 0.5],
+    [56, -22, 14, 9, -0.2], [76, -15, 12, 8, 0.3], [94, -21, 13, 9, -0.4],
+    [112, -13, 11, 7, 0.2], [30, -8, 10, 7, -0.5], [84, -8, 10, 7, 0.4],
+  ];
+  const frontColors = ['#58c24a', '#7ed957', '#4caf50', '#8bc34a', '#66bb6a'];
+  for (let i = 0; i < frontLeaves.length; i++) {
+    const L = frontLeaves[i];
+    ctx.fillStyle = frontColors[i % frontColors.length];
+    ctx.beginPath();
+    ctx.ellipse(x + L[0] + sway, y + L[1], L[2], L[3], L[4], 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // --- Hanging twigs below the limb: the underside edge a ducking
+  // turkey slips under. Kept SHORT: leaf bottoms stop at y + 29 (y 545),
+  // ~9px above the ducked turkey's head top (y 554), so the ducked head
+  // stays visibly clear of the leaves.
+  const hangX = [22, 58, 92];
+  for (let i = 0; i < hangX.length; i++) {
+    const hx = x + hangX[i];
     ctx.strokeStyle = '#4a2e16';
     ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
     ctx.beginPath();
-    ctx.moveTo(lx, y + 10);
-    ctx.lineTo(lx, y + 22);
+    ctx.moveTo(hx, y + 10);
+    ctx.lineTo(hx, y + 20);
     ctx.stroke();
-    ctx.fillStyle = leafColors[(i + 2) % leafColors.length];
+    ctx.fillStyle = frontColors[(i + 2) % frontColors.length];
     ctx.beginPath();
-    ctx.ellipse(lx, y + 26, 9, 6, -0.4, 0, Math.PI * 2);
+    ctx.ellipse(hx, y + 24, 8, 5, -0.4, 0, Math.PI * 2);
     ctx.fill();
   }
 }
