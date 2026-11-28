@@ -109,6 +109,11 @@ function turkeyDraw(ctx, t, time) {
     ctx.beginPath();
     ctx.ellipse(0, -26, 9, 30, 0, 0, Math.PI * 2);
     ctx.fill();
+    // v20: light rim on each tail feather so the fan keeps its edge
+    // against dark trees behind the bird.
+    ctx.strokeStyle = '#f2d492';
+    ctx.lineWidth = 2;
+    ctx.stroke();
     ctx.fillStyle = '#f2d492';
     ctx.beginPath();
     ctx.ellipse(0, -40, 4, 10, 0, 0, Math.PI * 2);
@@ -128,13 +133,14 @@ function turkeyDraw(ctx, t, time) {
   ctx.stroke();
 
   // Body, with a warm rim so it stays readable against the dark purple
-  // hills and trees behind it, even at thumbnail size.
+  // hills and trees behind it, even at thumbnail size. v20: rim 3 -> 4.5
+  // (scale stays 1.45x — Ban's call, not a bug) for more separation.
   ctx.fillStyle = '#8a5a2b';
   ctx.beginPath();
   ctx.ellipse(50, h - 30, 34, 26, -0.15, 0, Math.PI * 2);
   ctx.fill();
   ctx.strokeStyle = '#e8c98a';
-  ctx.lineWidth = 3;
+  ctx.lineWidth = 4.5;
   ctx.stroke();
   ctx.fillStyle = '#a06a35';
   ctx.beginPath();
@@ -151,14 +157,18 @@ function turkeyDraw(ctx, t, time) {
   ctx.fill();
   ctx.restore();
 
-  // Neck and head.
+  // Neck and head (v20: light rims, same reason as the body).
   ctx.fillStyle = '#7a4a22';
   ctx.beginPath();
   ctx.ellipse(78, h - 58, 9, 18, 0.25, 0, Math.PI * 2);
   ctx.fill();
+  ctx.strokeStyle = '#e8c98a';
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
   ctx.beginPath();
   ctx.arc(82, h - 76, 13, 0, Math.PI * 2);
   ctx.fill();
+  ctx.stroke();
   // Beak.
   ctx.fillStyle = '#f2a541';
   ctx.beginPath();
@@ -229,7 +239,7 @@ function turkeyDrawDuck(ctx, h) {
   ctx.ellipse(54, h - 16, 50, 15, -0.05, 0, Math.PI * 2);
   ctx.fill();
   ctx.strokeStyle = '#e8c98a';
-  ctx.lineWidth = 3;
+  ctx.lineWidth = 4;
   ctx.stroke();
   ctx.fillStyle = '#a06a35';
   ctx.beginPath();

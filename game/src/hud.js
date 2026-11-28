@@ -75,34 +75,37 @@ function hudDraw(ctx, game) {
   }
 
   // Farmer gap meter, bottom left: the farmer icon closes on the turkey.
+  // v20: the meter was unreadable at thumbnail size (260px box, 18px
+  // label, dark-on-dark). Bigger box, brighter gold border, 23px label,
+  // thicker track and dots — it must read as a labelled meter at 320px.
   const meterX = 22;
   const meterY = CFG.canvasHeight - 52;
-  const meterW = 260;
-  ctx.fillStyle = 'rgba(26, 12, 32, 0.78)';
+  const meterW = 350;
+  ctx.fillStyle = 'rgba(26, 12, 32, 0.88)';
   ctx.beginPath();
-  ctx.roundRect(meterX - 10, meterY - 26, meterW + 20, 44, 8);
+  ctx.roundRect(meterX - 12, meterY - 32, meterW + 24, 58, 10);
   ctx.fill();
-  ctx.strokeStyle = 'rgba(255, 209, 102, 0.55)';
-  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = 'rgba(255, 209, 102, 0.9)';
+  ctx.lineWidth = 2.5;
   ctx.stroke();
-  ctx.fillStyle = '#ff8a7a';
-  ctx.font = 'bold 18px system-ui, sans-serif';
+  ctx.fillStyle = '#ff9d8a';
+  ctx.font = 'bold 23px system-ui, sans-serif';
   ctx.textAlign = 'left';
-  ctx.fillText('FARMER JOE', meterX, meterY - 6);
+  ctx.fillText('FARMER JOE', meterX, meterY - 10);
   const gapFrac = Math.max(0, Math.min(1, game.gap / CFG.gapMax));
   const trackY = meterY + 6;
   ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
-  ctx.fillRect(meterX, trackY, meterW, 8);
+  ctx.fillRect(meterX, trackY, meterW, 12);
   ctx.fillStyle = gapFrac > 0.28 ? '#7ddb6a' : '#ff6b5e';
-  ctx.fillRect(meterX, trackY, meterW * gapFrac, 8);
-  // Farmer dot and turkey dot.
+  ctx.fillRect(meterX, trackY, meterW * gapFrac, 12);
+  // Farmer dot and turkey dot (dots travel inside the box: inset 20px).
   ctx.fillStyle = '#a83226';
   ctx.beginPath();
-  ctx.arc(meterX + 8, trackY + 4, 8, 0, Math.PI * 2);
+  ctx.arc(meterX + 10, trackY + 6, 10, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = '#ffd166';
   ctx.beginPath();
-  ctx.arc(meterX + 8 + meterW * gapFrac, trackY + 4, 8, 0, Math.PI * 2);
+  ctx.arc(meterX + 10 + (meterW - 20) * gapFrac, trackY + 6, 10, 0, Math.PI * 2);
   ctx.fill();
 
   // Danger vignette when the farmer is close.
@@ -212,13 +215,18 @@ function hudDrawTitle(ctx, game) {
   drawButton(ctx, w / 2 - 190, 520, 380, 62, 'CLICK OR PRESS SPACE TO RUN');
   // Footer on its own dark pill (like the mute note), so it reads on the
   // brown ground instead of dissolving into it.
+  // v20: the footer pill was invisible at thumbnail size (16px text on a
+  // 28px pill). Bigger text, taller pill, gold rim — it must read at 320px.
   const footerLabel = 'P — pause      M — sound      R — restart';
-  ctx.font = '16px system-ui, sans-serif';
+  ctx.font = 'bold 20px system-ui, sans-serif';
   const footerW = ctx.measureText(footerLabel).width;
-  ctx.fillStyle = 'rgba(26, 12, 32, 0.78)';
+  ctx.fillStyle = 'rgba(26, 12, 32, 0.88)';
   ctx.beginPath();
-  ctx.roundRect(w / 2 - footerW / 2 - 14, 602, footerW + 28, 28, 12);
+  ctx.roundRect(w / 2 - footerW / 2 - 16, 598, footerW + 32, 36, 14);
   ctx.fill();
+  ctx.strokeStyle = 'rgba(255, 209, 102, 0.65)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
   ctx.fillStyle = '#ffe9b8';
   ctx.fillText(footerLabel, w / 2, 622);
   if (game.best > 0) {
@@ -232,8 +240,12 @@ function hudDrawEnd(ctx, game) {
   const w = CFG.canvasWidth;
   const h = CFG.canvasHeight;
   const escaped = game.state === 'escaped';
+  // v20: the overlay used to dim the top HUD too, so "DISTANCE 1000m /
+  // 1000m · STAGE 3 · FOREST EDGE" was unreadable in shot 4. The dim now
+  // starts below the 64px top bar, so the HUD stays exactly as readable
+  // as in gameplay; the gold SCORE/DISTANCE line still dominates.
   ctx.fillStyle = escaped ? 'rgba(20, 46, 20, 0.55)' : 'rgba(46, 10, 10, 0.6)';
-  ctx.fillRect(0, 0, w, h);
+  ctx.fillRect(0, 64, w, h - 64);
 
   ctx.textAlign = 'center';
   ctx.fillStyle = escaped ? '#ffd166' : '#ff6b5e';

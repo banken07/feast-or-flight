@@ -51,11 +51,18 @@ function createWorld(rng) {
       color: rng.pick(['#e8a33d', '#d97b29', '#c65a1a', '#f2d492']),
     });
   }
+  // v20: taller, denser near trees (tops reach y ~410 instead of ~460)
+  // plus a far treeline rooted on the far-hill crest — both fill bands
+  // that used to read as empty sky. Purely visual: no gameplay geometry.
   const trees = [];
-  for (let i = 0; i < 9; i++) {
-    trees.push({ x: i * 170 + rng.range(-40, 40), h: rng.range(80, 140) });
+  for (let i = 0; i < 14; i++) {
+    trees.push({ x: i * 110 + rng.range(-30, 30), h: rng.range(110, 190) });
   }
-  return { leaves, trees, scroll: 0 };
+  const farTrees = [];
+  for (let i = 0; i < 12; i++) {
+    farTrees.push({ x: i * 130 + rng.range(-30, 30), h: rng.range(38, 66) });
+  }
+  return { leaves, trees, farTrees, scroll: 0 };
 }
 
 function worldUpdate(world, dt, speed) {
@@ -113,15 +120,29 @@ function worldDraw(ctx, world, distance, time) {
   ctx.arc(sunX, sunY, 52, 0, Math.PI * 2);
   ctx.fill();
 
-  // Clouds.
+  // Clouds (v20: 5 instead of 4, sitting lower, plus a second band of
+  // bigger, lower clouds at y ~300-370 — the y 180-350 band was ~89%
+  // empty sky in every gameplay shot. v20b: main clouds bigger still
+  // (rx 160/120) after measuring y180-300 still ~80% empty.
   ctx.fillStyle = 'rgba(122, 45, 94, 0.55)';
-  for (let i = 0; i < 4; i++) {
-    const cx = ((i * 360 - world.scroll * 0.08) % 1400 + 1400) % 1400 - 60;
+  for (let i = 0; i < 5; i++) {
+    const cx = ((i * 320 - world.scroll * 0.08) % 1500 + 1500) % 1500 - 60;
     ctx.beginPath();
-    ctx.ellipse(cx, 110 + i * 42, 110, 20, 0, 0, Math.PI * 2);
+    ctx.ellipse(cx, 100 + i * 40, 160, 26, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.beginPath();
-    ctx.ellipse(cx + 60, 122 + i * 42, 80, 16, 0, 0, Math.PI * 2);
+    ctx.ellipse(cx + 90, 112 + i * 40, 120, 20, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.fillStyle = 'rgba(122, 45, 94, 0.6)';
+  for (let i = 0; i < 3; i++) {
+    const cx = ((i * 520 + 180 - world.scroll * 0.06) % 1500 + 1500) % 1500 - 110;
+    const cy = 296 + i * 36;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, 170, 28, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(cx + 110, cy + 12, 130, 20, 0, 0, Math.PI * 2);
     ctx.fill();
   }
 
@@ -141,6 +162,20 @@ function worldDraw(ctx, world, distance, time) {
     ctx.stroke();
   }
 
+  // Lower bird flock (v20): a loose V crossing the mid-sky at y ~230-290.
+  ctx.strokeStyle = 'rgba(43, 27, 74, 0.7)';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  for (let i = 0; i < 6; i++) {
+    const bx = (((900 + i * 48 - world.scroll * 0.05) % 1400) + 1400) % 1400 - 60;
+    const by = 232 + Math.abs(i - 2.5) * 14 + Math.sin(time * 0.8 + i) * 4;
+    ctx.beginPath();
+    ctx.moveTo(bx - 8, by + 3);
+    ctx.lineTo(bx, by - 3);
+    ctx.lineTo(bx + 8, by + 3);
+    ctx.stroke();
+  }
+
   // Far hills.
   ctx.fillStyle = pal.hillFar;
   ctx.beginPath();
@@ -152,6 +187,19 @@ function worldDraw(ctx, world, distance, time) {
   ctx.lineTo(0, CFG.groundY);
   ctx.closePath();
   ctx.fill();
+
+  // Far treeline (v20): small dark trees rooted on the far-hill crest
+  // fill the y ~400-500 band behind the houses. Same crest function as
+  // the far hills, so every tree sits on the hillside, never floating.
+  ctx.fillStyle = pal.hillNear;
+  for (const tree of world.farTrees) {
+    const tx = ((tree.x - world.scroll * 0.2) % 1560 + 1560) % 1560 - 60;
+    const crestY = 500 - Math.sin((tx + world.scroll * 0.15) * 0.004) * 34;
+    ctx.beginPath();
+    ctx.ellipse(tx, crestY - tree.h, 16, tree.h, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillRect(tx - 3, crestY - 22, 6, 22);
+  }
 
   // Farmhouse and barn silhouettes (parallax 0.35). Bases sit below the
   // deepest hill crest (534) so they are always sunk into the hillside.
@@ -165,6 +213,7 @@ function worldDraw(ctx, world, distance, time) {
     drawFarmhouse(ctx, fx, 545);
     drawFarmhouse(ctx, fx + 760, 545);
     drawBarn(ctx, fx + 420, 555);
+    drawWindmill(ctx, fx + 1150, 545, time);
   }
 
   // Kitchen-yard smoke: in stage 2 the ovens are cooking, so the
@@ -231,6 +280,16 @@ function worldDraw(ctx, world, distance, time) {
     const dx = x - (world.scroll % 120);
     ctx.fillRect(dx, CFG.groundY + 56, 54, 6);
   }
+  // Bushes (v20): low dark shrubs along the path edge fill the strip
+  // just above the ground line. Background only, drawn under obstacles.
+  ctx.fillStyle = '#2e4a22';
+  for (let i = 0; i < 10; i++) {
+    const bx = ((i * 150 + 40 - world.scroll * 0.8) % 1500 + 1500) % 1500 - 60;
+    const bh = 14 + ((i * 37) % 12);
+    ctx.beginPath();
+    ctx.ellipse(bx, CFG.groundY - bh / 2, 26, bh / 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
 
   // Drifting leaves.
   for (const leaf of world.leaves) {
@@ -279,6 +338,42 @@ function drawFarmhouse(ctx, x, baseY) {
   ctx.beginPath();
   ctx.arc(x + 118, baseY - 150, 10, 0, Math.PI * 2);
   ctx.arc(x + 126, baseY - 168, 13, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+// A farm windmill silhouette (v20): tower + slow blades fill the
+// vertical slice y ~300-545 between the houses that was empty sky.
+// Base sunk into the hillside like the farmhouse (baseY 545 > deepest
+// crest 534). Blades turn on game time only (deterministic).
+function drawWindmill(ctx, x, baseY, time) {
+  ctx.fillStyle = 'rgba(20, 8, 20, 0.3)';
+  ctx.beginPath();
+  ctx.ellipse(x + 17, baseY + 2, 40, 7, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#2e1a3a';
+  ctx.beginPath();
+  ctx.moveTo(x, baseY);
+  ctx.lineTo(x + 10, baseY - 195);
+  ctx.lineTo(x + 24, baseY - 195);
+  ctx.lineTo(x + 34, baseY);
+  ctx.closePath();
+  ctx.fill();
+  const hubX = x + 17;
+  const hubY = baseY - 200;
+  const ang = time * 0.5;
+  ctx.strokeStyle = '#2e1a3a';
+  ctx.lineWidth = 7;
+  ctx.lineCap = 'round';
+  for (let i = 0; i < 4; i++) {
+    const a = ang + (i * Math.PI) / 2;
+    ctx.beginPath();
+    ctx.moveTo(hubX, hubY);
+    ctx.lineTo(hubX + Math.cos(a) * 52, hubY + Math.sin(a) * 52);
+    ctx.stroke();
+  }
+  ctx.fillStyle = '#ffd166';
+  ctx.beginPath();
+  ctx.arc(hubX, hubY, 7, 0, Math.PI * 2);
   ctx.fill();
 }
 
